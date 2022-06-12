@@ -1,6 +1,6 @@
 sentry:
   config:
-    sentry_dsn: 'https://a20d2a8e159c4c4aa5cf06b2be934d1d@o1282293.ingest.sentry.io/6489993'
+    sentry_dsn: '<your-sentry-dsn>'
     sentry_production_environment: 'production'
     sentry_debug_environment: 'debug'
     sentry_release: '1.0.0' # not implemented yet

@@ -95,7 +95,7 @@ namespace SentryPHPManager
             }
             else
             {
-                self::$config = $cache->get();
+                self::$config = $cache->get() ?? [];
                 EventDispatcher::get()->when('after.sentry.init', function () {
                     Sentry::get()->sendInfo('SentryPHPManager: SentryPHPManager has loaded the configuration file from cache.');
                 });

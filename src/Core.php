@@ -24,6 +24,12 @@ namespace SentryPHPManager
             self::sendMessage($message, Severity::error());
         }
 
+        public function sendFatal(string $message):
+        void
+        {
+            self::sendMessage($message, Severity::fatal());
+        }
+
         public function sendInfo(string $message):
         void
         {
@@ -34,12 +40,6 @@ namespace SentryPHPManager
         void
         {
             self::sendMessage($message, Severity::warning());
-        }
-
-        public function sendFatal(string $message):
-        void
-        {
-            self::sendMessage($message, Severity::fatal());
         }
 
         private static function sendMessage(string $message, string $level): void
@@ -59,10 +59,13 @@ namespace SentryPHPManager
 
             if (!$cache->isHit())
             {
+                // Seta o timeout do cache para 1 hora.
                 $cacheFactory->get('sentry-manager-config', function (ItemInterface $item)
                 {
                     $item->expiresAfter(3600);
                 });
+                // Verifica se o arquivo de configuração existe
+                // e se é possível ler.
                 try
                 {
                     $yml = Yaml::parseFile(__DIR__ . '\..\sentry-manager.yml');
@@ -70,6 +73,7 @@ namespace SentryPHPManager
                     if (!empty($yml) && isset($yml['sentry']['config']))
                     {
                         $cache->set($yml['sentry']['config']);
+                        $cache->expiresAfter(3600);
                         $cacheFactory->save($cache);
                         EventDispatcher::get()->when('after.sentry.init', function () {
                             Sentry::get()->sendInfo('SentryPHPManager: SentryPHPManager has refreshed the configuration file.');
@@ -78,7 +82,7 @@ namespace SentryPHPManager
                     else
                     {
                         EventDispatcher::get()->when('after.sentry.init', function () {
-                            captureException(new Exception('sentry-manager.yml is invalid.'));
+                            captureException(new Exception('sentry-manager.yml is empty or missing "sentry" section.'));
                         });
                     }
                 }
@@ -92,6 +96,9 @@ namespace SentryPHPManager
             else
             {
                 self::$config = $cache->get();
+                EventDispatcher::get()->when('after.sentry.init', function () {
+                    Sentry::get()->sendInfo('SentryPHPManager: SentryPHPManager has loaded the configuration file from cache.');
+                });
             }
         }
 
@@ -105,21 +112,22 @@ namespace SentryPHPManager
             return $cacheFactory->getItem('sentry-manager-config');
         }
 
-        private static function dispatch_message(string $when, string $message, string $type = 'i'): void
+        private static function dispatch_message(string $when, string $message, string $type = 'i'):
+        void
         {
             EventDispatcher::get()->when($when, function () use ($message, $type) {
                 switch ($type) {
                     case 'e':
                         self::get()->sendError($message);
                         break;
+                    case 'f':
+                        self::get()->sendFatal($message);
+                        break;
                     case 'i':
                         self::get()->sendInfo($message);
                         break;
                     case 'w':
                         self::get()->sendWarning($message);
-                        break;
-                    case 'f':
-                        self::get()->sendFatal($message);
                         break;
                     default:
                         break;

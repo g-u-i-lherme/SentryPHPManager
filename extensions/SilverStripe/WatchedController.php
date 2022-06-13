@@ -26,5 +26,14 @@ namespace SentryPHPManager\extensions\SilverStripe
             Sentry::debug(); // @todo: refatorar antes da release!
             parent::init();
         }
+
+        /**
+         * @throws Exception
+         */
+        public function sentry():
+        Sentry
+        {
+            return Sentry::get();
+        }
     }
 }

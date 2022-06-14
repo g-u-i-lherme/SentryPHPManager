@@ -1,0 +1,12 @@
+sentry:
+  config:
+    sentry_dsn: '<your-sentry-dsn>'
+    sentry_production_environment: 'production'
+    sentry_debug_environment: 'debug'
+    sentry_release: '1.0.0' # not implemented yet
+    sentry_organization: 'sentry' # not implemented yet
+    sentry_project: '<sentry-php-manager>' # not implemented yet
+    sentry_token: '<token>' # not implemented yet
+    sentry_timeout: '5' # not implemented yet
+    sentry_log_level: 'error' # not implemented yet
+    sentry_log_path: 'app/logs/sentry.log' # not implemented yet
